@@ -6,7 +6,8 @@ import CartTotal from '../components/cartTotal';
 
 const Cart = () => {
 
-    const {products,currency,cartItems,updateQuantity,navigate}=useContext(Shopcontext);
+    const {products,currency,cartItems,updateQuantity,navigate, loading}=useContext(Shopcontext);
+    console.log(products)
     const [cartData,setCartData]=useState([]);
     
     useEffect(()=>{
@@ -40,7 +41,7 @@ const Cart = () => {
 
         <div>
             
-            {
+            { loading? <p>Loading...</p>:
                 cartData.map((item,index)=>{
                     {console.log(item)}
                     {console.log(products)}

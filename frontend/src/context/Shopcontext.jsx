@@ -15,19 +15,16 @@ const [cartItems,setCartItems]=useState({});
 const [products,setProducts]=useState([]);
 const navigate=useNavigate();
 const [token,setToken]=useState("");
+const [loading, setLoading] = useState(false);
 
 
 
 const addToCart=async(ItemId,size)=>{
-    
     if(!size){
         toast.error("Select Product Size");
         return;
     }
-
     let cartData=structuredClone(cartItems); 
-    
-
     if(cartData[ItemId]){
         if(cartData[ItemId][size]){
             cartData[ItemId][size]+=1;
@@ -40,9 +37,7 @@ else{
     cartData[ItemId]={};
     cartData[ItemId][size]=1;
 }
-
 setCartItems(cartData);
-
 if(token){
     try {
         await axios.post(backendUrl+"/api/cart/add",{ItemId,size},{headers:{token}})
@@ -103,20 +98,22 @@ const updateQuantity=async(itemId,size,quantity)=>{
     }
 }
 
-const getProductsData=async () =>{
+const getProductsData = async () => {
+    setLoading(true)
     try {
-        const response=await axios.get(backendUrl+"/api/product/list");
-        if(response.data.success){
+        const response = await axios.get(backendUrl + "/api/product/list");
+        if (response.data.success) {
             setProducts(response.data.products);
-        }else{
+        } else {
             toast.error(response.data.message);
         }
-        
     } catch (error) {
-        console.log(error);
+        console.error(error);
         toast.error(error.message);
+    } finally {
+        setLoading(false);
     }
-}
+};
 
 
 
@@ -133,19 +130,22 @@ const getUserCart= async (token)=>{
     }
 }
 
-useEffect(()=>{
+useEffect(() => {
+    console.log("Fetching products...");
     getProductsData();
-},[]);
+}, []);
+
 
 useEffect(()=>{
-    if(!token && localStorage.getItem("token")){
-        setToken(localStorage.getItem("token"));
-        getUserCart(localStorage.getItem("token"));
+    let localToken=localStorage.getItem("token");
+    if(localToken){
+        setToken(localToken);
+        getUserCart(localToken);
     }
-},[])
+},[token])
 
     const value={
-        products,currency,delivery_fee,search,showSearch,setShowSearch,setSearch,cartItems,addToCart,getCartCount,updateQuantity,getCartAmount,navigate,backendUrl,token,setToken,setCartItems
+        products,currency,delivery_fee,search,showSearch,setShowSearch,setSearch,cartItems,addToCart,getCartCount,updateQuantity,getCartAmount,navigate,backendUrl,token,setToken,setCartItems, loading
     };
 
     return(
